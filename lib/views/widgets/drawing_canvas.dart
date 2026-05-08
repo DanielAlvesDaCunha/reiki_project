@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../viewmodels/drawing/drawing_event.dart';
 import '../../viewmodels/drawing/drawing_state.dart';
 import '../../viewmodels/drawing/drawing_viewmodel.dart';
-import 'choku_rei_guide_painter.dart';
 
 /// Canvas de desenho com sistema de coordenadas fixo.
 ///
@@ -39,7 +38,7 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
   Size _canvasSize = Size.zero;
 
   // ── Zoom/pan ──────────────────────────────────────────
-  double _scale = 1.0;
+  double _scale = 1.95;
   Offset _panOffset = Offset.zero; // em unidades normalizadas (base = min(w,h))
   bool _isZooming = false;
 
@@ -67,7 +66,7 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
     widget.scaleNotifier?.value = scale;
   }
 
-  void _resetZoom() => setState(() => _updateTransform(1.0, Offset.zero));
+  void _resetZoom() => setState(() => _updateTransform(1.95, Offset.zero));
 
   @override
   void initState() {
@@ -94,17 +93,23 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
         return LayoutBuilder(
           builder: (context, constraints) {
             _canvasSize = Size(constraints.maxWidth, constraints.maxHeight);
+            final base = min(_canvasSize.width, _canvasSize.height);
 
             return Stack(
               children: [
-                // ── Guia de setas (camada de fundo, só para choku_rei) ──
-                if (widget.symbolId == 'choku_rei' && state.showGuide)
+                // ── Guia de traços — acompanha zoom/pan do canvas ──
+                if (state.showGuide)
                   Positioned.fill(
                     child: IgnorePointer(
-                      child: Opacity(
-                        opacity: 0.30,
-                        child: ChokuReiGuide(
-                          strokeColor: const Color(0xFFFFD700),
+                      child: Transform.translate(
+                        offset: Offset(
+                          -_panOffset.dx * base * _scale,
+                          -_panOffset.dy * base * _scale,
+                        ),
+                        child: Transform.scale(
+                          scale: _scale,
+                          alignment: Alignment.center,
+                          child: _SymbolGuideLayer(symbolId: widget.symbolId),
                         ),
                       ),
                     ),
@@ -142,7 +147,8 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
       _gestureBaseScale = _scale;
       _gestureStartFocalNorm = _screenToNorm(d.localFocalPoint);
       _activeData.value = _activeData.value.clearStroke();
-    } else {
+    } else if (!state.isVerificar) {
+      // Modo verificar é somente leitura — 1 dedo não desenha
       _isZooming = false;
       _activeData.value = _ActiveData(
         stroke: _ActiveStroke(
@@ -347,4 +353,52 @@ void _drawStroke(
   }
   path.lineTo(px(normPoints.last).dx, px(normPoints.last).dy);
   canvas.drawPath(path, paint);
+}
+
+// ── Guia por símbolo ───────────────────────────────────
+
+/// Retorna o caminho do asset PNG de guia para o símbolo, ou null se não houver.
+String? guideAssetPath(String symbolId) {
+  const guides = {
+    'choku_rei':      'assets/guides/choku_rei.png',
+    'seiheki':        'assets/guides/seiheki.png',
+    'honshazeshonen': 'assets/guides/honshazeshonen.png',
+    'daikoomyo_usui': 'assets/guides/daikoomyo_usui.png',
+    'serpente_fogo':  'assets/guides/serpente_fogo.png',
+    'raku':           'assets/guides/raku.png',
+    'la_hanna_nai':   'assets/guides/la_hanna_nai.png',
+  };
+  return guides[symbolId];
+}
+
+/// True se o símbolo tem algum guia disponível (vetorial ou PNG).
+bool symbolHasGuide(String? symbolId) {
+  if (symbolId == null) return false;
+  return symbolId == 'choku_rei' || guideAssetPath(symbolId) != null;
+}
+
+/// Camada de guia: vetorial para choku_rei, PNG para os demais.
+class _SymbolGuideLayer extends StatelessWidget {
+  final String? symbolId;
+  const _SymbolGuideLayer({this.symbolId});
+
+  @override
+  Widget build(BuildContext context) {
+    final path = symbolId != null ? guideAssetPath(symbolId!) : null;
+    if (path == null) return const SizedBox.shrink();
+
+    return Opacity(
+      opacity: 0.50,
+      child: Transform.scale(
+        scale: 1.2,
+        child: Image.asset(
+          path,
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.high,
+          color: Colors.white,
+          colorBlendMode: BlendMode.srcIn,
+        ),
+      ),
+    );
+  }
 }

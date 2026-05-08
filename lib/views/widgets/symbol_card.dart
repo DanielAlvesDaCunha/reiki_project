@@ -84,7 +84,11 @@ class _SymbolAvatar extends StatelessWidget {
       ),
       child: symbol.imagePath != null
           ? ClipOval(
-              child: Image.asset(symbol.imagePath!, fit: BoxFit.cover),
+              child: Image.asset(
+                symbol.imagePath!,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+              ),
             )
           : Icon(Icons.auto_awesome,
               color: const Color(0xFFB388FF), size: size * 0.5),

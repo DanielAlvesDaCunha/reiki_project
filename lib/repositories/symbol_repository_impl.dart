@@ -125,6 +125,7 @@ class SymbolRepositoryImpl implements SymbolRepository {
         'Iniciações de Mestrado',
       ],
       minLevel: ReikiLevel.levelIIIB,
+      imagePath: 'assets/images/symbol_3.jpeg',
     ),
     ReikiSymbol(
       id: 'raku',

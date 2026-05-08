@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 
 import '../../core/network/dio_client.dart';
+import '../../repositories/drawing_save_repository.dart';
+import '../../repositories/drawing_save_repository_impl.dart';
 import '../../repositories/symbol_repository.dart';
 import '../../repositories/symbol_repository_impl.dart';
 import '../../viewmodels/disclaimer/disclaimer_viewmodel.dart';
@@ -14,6 +16,7 @@ void setupDependencies() {
 
   // Repositories
   sl.registerLazySingleton<SymbolRepository>(() => SymbolRepositoryImpl());
+  sl.registerLazySingleton<DrawingSaveRepository>(() => DrawingSaveRepositoryImpl());
 
   // ViewModels (BLoC)
   sl.registerFactory<DisclaimerViewModel>(() => DisclaimerViewModel());

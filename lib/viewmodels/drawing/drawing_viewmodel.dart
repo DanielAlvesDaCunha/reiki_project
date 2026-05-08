@@ -4,7 +4,11 @@ import 'drawing_event.dart';
 import 'drawing_state.dart';
 
 class DrawingViewModel extends Bloc<DrawingEvent, DrawingState> {
-  DrawingViewModel() : super(const DrawingState()) {
+  DrawingViewModel({
+    DrawingMode mode = DrawingMode.treino,
+    bool initialShowGuide = true,
+    List<DrawingStroke> initialStrokes = const [],
+  }) : super(DrawingState(mode: mode, showGuide: initialShowGuide, strokes: initialStrokes)) {
     on<DrawingStrokeCompleted>(_onStrokeCompleted);
     on<DrawingUndo>(_onUndo);
     on<DrawingClear>(_onClear);

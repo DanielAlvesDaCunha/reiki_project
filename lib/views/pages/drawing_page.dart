@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/di/injection_container.dart';
+import '../../core/routes/fade_slide_route.dart';
 import '../../models/reiki_symbol.dart';
+import '../../models/saved_drawing.dart';
+import '../../repositories/drawing_save_repository.dart';
 import '../../viewmodels/drawing/drawing_event.dart';
 import '../../viewmodels/drawing/drawing_state.dart';
 import '../../viewmodels/drawing/drawing_viewmodel.dart';
@@ -10,13 +14,26 @@ import '../widgets/drawing_canvas.dart';
 
 class DrawingPage extends StatelessWidget {
   final ReikiSymbol symbol;
+  final DrawingMode mode;
+  final List<DrawingStroke> initialStrokes;
 
-  const DrawingPage({super.key, required this.symbol});
+  const DrawingPage({
+    super.key,
+    required this.symbol,
+    this.mode = DrawingMode.treino,
+    this.initialStrokes = const [],
+  });
 
   @override
   Widget build(BuildContext context) {
+    final hasGuide = symbolHasGuide(symbol.id);
     return BlocProvider(
-      create: (_) => DrawingViewModel(),
+      create: (_) => DrawingViewModel(
+        mode: mode,
+        // treino e verificar começam com guia ligado; yantrar sempre sem guia
+        initialShowGuide: hasGuide && mode != DrawingMode.paraValer,
+        initialStrokes: initialStrokes,
+      ),
       child: _DrawingView(symbol: symbol),
     );
   }
@@ -92,6 +109,185 @@ class _DrawingViewState extends State<_DrawingView> {
 }
 
 // ─────────────────────────────────────────────────────────
+// Salvar desenho
+// ─────────────────────────────────────────────────────────
+
+void _showSaveDialog(
+  BuildContext context,
+  ReikiSymbol symbol,
+  List<DrawingStroke> strokes,
+) {
+  final now = DateTime.now();
+  final dateStr =
+      '${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')} '
+      '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+  final controller =
+      TextEditingController(text: '${symbol.name} — $dateStr');
+
+  showDialog(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Salvar desenho'),
+      content: TextField(
+        controller: controller,
+        decoration: const InputDecoration(labelText: 'Nome'),
+        autofocus: true,
+        maxLength: 60,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () async {
+            final name = controller.text.trim().isEmpty
+                ? symbol.name
+                : controller.text.trim();
+            final saved = SavedDrawing(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              symbolId: symbol.id,
+              symbolName: symbol.name,
+              name: name,
+              savedAt: DateTime.now(),
+              strokes: strokes,
+            );
+            await sl<DrawingSaveRepository>().save(saved);
+            if (ctx.mounted) Navigator.pop(ctx);
+            if (context.mounted) _showSaveToast(context, name);
+          },
+          child: const Text(
+            'Salvar',
+            style: TextStyle(color: Color(0xFFFFD700)),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+void _showSaveToast(BuildContext context, String name) {
+  final overlay = Overlay.of(context);
+  late OverlayEntry entry;
+  entry = OverlayEntry(
+    builder: (_) => _SaveToast(
+      name: name,
+      onDone: () => entry.remove(),
+    ),
+  );
+  overlay.insert(entry);
+}
+
+// ── Toast flutuante de confirmação ───────────────────────
+
+class _SaveToast extends StatefulWidget {
+  final String name;
+  final VoidCallback onDone;
+  const _SaveToast({required this.name, required this.onDone});
+
+  @override
+  State<_SaveToast> createState() => _SaveToastState();
+}
+
+class _SaveToastState extends State<_SaveToast>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _opacity;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    );
+    _opacity = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
+    _scale = Tween<double>(begin: 0.82, end: 1.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack),
+    );
+    _ctrl.forward();
+    Future.delayed(const Duration(milliseconds: 2200), _dismiss);
+  }
+
+  Future<void> _dismiss() async {
+    if (mounted) {
+      await _ctrl.reverse();
+      widget.onDone();
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: Center(
+          child: FadeTransition(
+            opacity: _opacity,
+            child: ScaleTransition(
+              scale: _scale,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A0A2E),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                      color: const Color(0xFFFFD700), width: 1.5),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x99000000),
+                      blurRadius: 24,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.check_circle_rounded,
+                        color: Color(0xFFFFD700), size: 26),
+                    const SizedBox(width: 12),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Desenho salvo!',
+                          style: TextStyle(
+                            color: Color(0xFFFFD700),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.name,
+                          style: const TextStyle(
+                            color: Colors.white60,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────
 // Scaffold portrait — AppBar normal + body variável
 // ─────────────────────────────────────────────────────────
 
@@ -121,18 +317,46 @@ class _PortraitScaffold extends StatelessWidget {
             child: _SymbolBadge(symbol: symbol, size: 36),
           ),
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(symbol.name, style: theme.textTheme.titleLarge),
-            Text('Yantra — Prática do Desenho',
-                style: theme.textTheme.bodyMedium?.copyWith(fontSize: 11)),
-          ],
+        title: BlocBuilder<DrawingViewModel, DrawingState>(
+          builder: (_, state) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(symbol.name, style: theme.textTheme.titleLarge),
+              Text(
+                state.isTreino
+                    ? 'Treino — com guia de traços'
+                    : state.isVerificar
+                        ? 'Verificar — compare seu desenho'
+                        : 'Yantrar — canvas livre',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontSize: 11,
+                  color: state.isTreino
+                      ? const Color(0xFFFFD700)
+                      : const Color(0xFF80DEEA),
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           BlocBuilder<DrawingViewModel, DrawingState>(
             builder: (ctx, state) => Row(
               children: [
+                if ((state.isTreino || state.isVerificar) && symbolHasGuide(symbol.id))
+                  IconButton(
+                    icon: Icon(state.showGuide
+                        ? Icons.visibility
+                        : Icons.visibility_off),
+                    tooltip: state.isVerificar
+                        ? (state.showGuide ? 'Ocultar referência' : 'Comparar com referência')
+                        : (state.showGuide ? 'Ocultar guia' : 'Mostrar guia'),
+                    color: state.showGuide
+                        ? const Color(0xFFFFD700)
+                        : null,
+                    onPressed: () => ctx
+                        .read<DrawingViewModel>()
+                        .add(const DrawingGuideToggled()),
+                  ),
                 if (onEnterImmersive != null)
                   IconButton(
                     icon: const Icon(Icons.fullscreen),
@@ -140,9 +364,16 @@ class _PortraitScaffold extends StatelessWidget {
                     onPressed: onEnterImmersive,
                   ),
                 IconButton(
+                  icon: const Icon(Icons.bookmark_add_outlined),
+                  tooltip: 'Salvar desenho',
+                  onPressed: state.isEmpty
+                      ? null
+                      : () => _showSaveDialog(ctx, symbol, state.strokes),
+                ),
+                IconButton(
                   icon: const Icon(Icons.undo),
                   tooltip: 'Desfazer',
-                  onPressed: state.strokes.isEmpty
+                  onPressed: state.isVerificar || state.strokes.isEmpty
                       ? null
                       : () => ctx
                           .read<DrawingViewModel>()
@@ -151,7 +382,7 @@ class _PortraitScaffold extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
                   tooltip: 'Limpar',
-                  onPressed: state.isEmpty
+                  onPressed: state.isVerificar || state.isEmpty
                       ? null
                       : () => _confirmClear(ctx),
                 ),
@@ -309,16 +540,30 @@ class _LandscapeScaffoldState extends State<_LandscapeScaffold>
               ),
             ),
 
-            // ── Botões undo + clear (sempre visíveis, canto inferior esquerdo) ──
+            // ── Botões undo + clear + guia (canto inferior esquerdo) ──
             Positioned(
               bottom: pos * 1.2,
               left: pos,
               child: BlocBuilder<DrawingViewModel, DrawingState>(
                 builder: (ctx, state) => Row(
                   children: [
+                    if ((state.isTreino || state.isVerificar) && symbolHasGuide(widget.symbol.id)) ...[
+                      _FloatingIconButton(
+                        icon: state.showGuide
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: state.showGuide
+                            ? const Color(0xFFFFD700)
+                            : null,
+                        onTap: () => ctx
+                            .read<DrawingViewModel>()
+                            .add(const DrawingGuideToggled()),
+                      ),
+                      SizedBox(width: gap),
+                    ],
                     _FloatingIconButton(
                       icon: Icons.undo,
-                      onTap: state.strokes.isEmpty
+                      onTap: state.isVerificar || state.strokes.isEmpty
                           ? null
                           : () => ctx
                               .read<DrawingViewModel>()
@@ -328,7 +573,16 @@ class _LandscapeScaffoldState extends State<_LandscapeScaffold>
                     _FloatingIconButton(
                       icon: Icons.delete_outline,
                       color: Colors.redAccent,
-                      onTap: state.isEmpty ? null : () => _confirmClear(context),
+                      onTap: state.isVerificar || state.isEmpty
+                          ? null
+                          : () => _confirmClear(context),
+                    ),
+                    SizedBox(width: gap),
+                    _FloatingIconButton(
+                      icon: Icons.bookmark_add_outlined,
+                      onTap: state.isEmpty
+                          ? null
+                          : () => _showSaveDialog(context, widget.symbol, state.strokes),
                     ),
                   ],
                 ),
@@ -380,6 +634,13 @@ class _LandscapeScaffoldState extends State<_LandscapeScaffold>
                 position: _slideAnim,
                 child: _LandscapePanel(colors: widget.colors, symbolId: widget.symbol.id),
               ),
+            ),
+
+            // ── Pipeline nav (bottom-right, fora do painel) ──
+            Positioned(
+              bottom: pos * 1.2,
+              right: panelW + pos,
+              child: _PipelineFloatingButton(symbol: widget.symbol),
             ),
           ],
         ),
@@ -523,40 +784,6 @@ class _LandscapePanel extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-
-              // ── Botão guia (só para choku_rei) ──
-              if (symbolId == 'choku_rei') ...[
-                const Divider(color: Color(0xFF3D2060), height: 1),
-                SizedBox(height: sh * 0.02),
-                GestureDetector(
-                  onTap: () => context
-                      .read<DrawingViewModel>()
-                      .add(const DrawingGuideToggled()),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: dotSize,
-                    height: dotSize,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: state.showGuide
-                          ? const Color(0xFF6A0DAD)
-                          : const Color(0xFF2D1B4E),
-                      border: Border.all(
-                        color: const Color(0xFFFFD700),
-                        width: 2,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.route,
-                      size: dotSize * 0.50,
-                      color: state.showGuide
-                          ? const Color(0xFFFFD700)
-                          : const Color(0xFF6A0DAD),
-                    ),
-                  ),
-                ),
-                SizedBox(height: sh * 0.01),
-              ],
             ],
           ),
         );
@@ -597,7 +824,20 @@ class _PhoneLayout extends StatelessWidget {
                   curve: Curves.easeOutCubic,
                   builder: (_, offset, child) =>
                       FractionalTranslation(translation: offset, child: child),
-                  child: _DrawingToolbar(colors: colors),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 14, bottom: 6),
+                          child: _PipelineNextButton(symbol: symbol),
+                        ),
+                      ),
+                      _DrawingToolbar(colors: colors, symbolId: symbol.id),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -619,7 +859,7 @@ class _TabletLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
         Expanded(
           child: Stack(
@@ -633,7 +873,20 @@ class _TabletLayout extends StatelessWidget {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                child: _DrawingToolbar(colors: colors, symbolId: symbol.id),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 14, bottom: 6),
+                        child: _PipelineNextButton(symbol: symbol),
+                      ),
+                    ),
+                    _DrawingToolbar(colors: colors, symbolId: symbol.id),
+                  ],
+                ),
               ),
             ],
           ),
@@ -666,7 +919,7 @@ class _SymbolBadge extends StatelessWidget {
       ),
       child: symbol.imagePath != null
           ? ClipOval(
-              child: Image.asset(symbol.imagePath!, fit: BoxFit.cover))
+              child: Image.asset(symbol.imagePath!, fit: BoxFit.cover, filterQuality: FilterQuality.high))
           : Icon(Icons.auto_awesome,
               color: const Color(0xFFFFD700), size: size * 0.5),
     );
@@ -773,6 +1026,157 @@ class _ZoomResetButton extends StatelessWidget {
 }
 
 
+// ─────────────────────────────────────────────────────────
+// Pipeline navigation — pill flutuante acima da toolbar
+// ─────────────────────────────────────────────────────────
+
+class _PipelineNextButton extends StatelessWidget {
+  final ReikiSymbol symbol;
+  const _PipelineNextButton({required this.symbol});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DrawingViewModel, DrawingState>(
+      builder: (ctx, state) {
+        if (state.isVerificar) {
+          return GestureDetector(
+            onTap: () => Navigator.of(ctx).pop(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+              decoration: BoxDecoration(
+                color: const Color(0xDD1A0A2E),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: const Color(0xFFB388FF).withAlpha(200), width: 1.5),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.arrow_back_rounded,
+                      color: Color(0xFFB388FF), size: 15),
+                  SizedBox(width: 6),
+                  Text(
+                    'Voltar',
+                    style: TextStyle(
+                      color: Color(0xFFB388FF),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final isParaValer = state.mode == DrawingMode.paraValer;
+        final enabled = !isParaValer || !state.isEmpty;
+        final label = isParaValer ? 'Verificar' : 'Yantrar';
+        final icon = isParaValer ? Icons.compare_rounded : Icons.arrow_forward_rounded;
+        final accent = isParaValer ? const Color(0xFF80DEEA) : const Color(0xFFFFD700);
+
+        return GestureDetector(
+          onTap: enabled ? () => _advance(context, state) : null,
+          child: AnimatedOpacity(
+            opacity: enabled ? 1.0 : 0.35,
+            duration: const Duration(milliseconds: 200),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+              decoration: BoxDecoration(
+                color: const Color(0xDD1A0A2E),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: accent.withAlpha(210), width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: accent.withAlpha(40),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: accent,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(icon, color: accent, size: 15),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _advance(BuildContext context, DrawingState state) {
+    if (state.mode == DrawingMode.paraValer) {
+      Navigator.of(context).push(FadeSlideRoute(
+        page: DrawingPage(
+          symbol: symbol,
+          mode: DrawingMode.verificar,
+          initialStrokes: state.strokes,
+        ),
+      ));
+    } else {
+      Navigator.of(context).push(FadeSlideRoute(
+        page: DrawingPage(symbol: symbol, mode: DrawingMode.paraValer),
+      ));
+    }
+  }
+}
+
+// Versão flutuante para o modo landscape
+class _PipelineFloatingButton extends StatelessWidget {
+  final ReikiSymbol symbol;
+  const _PipelineFloatingButton({required this.symbol});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DrawingViewModel, DrawingState>(
+      builder: (ctx, state) {
+        if (state.isVerificar) return const SizedBox.shrink();
+
+        final isParaValer = state.mode == DrawingMode.paraValer;
+        final enabled = !isParaValer || !state.isEmpty;
+
+        return _FloatingIconButton(
+          icon: isParaValer ? Icons.compare_rounded : Icons.arrow_forward_rounded,
+          color: isParaValer ? const Color(0xFF80DEEA) : const Color(0xFFFFD700),
+          onTap: enabled
+              ? () {
+                  if (isParaValer) {
+                    Navigator.of(context).push(FadeSlideRoute(
+                      page: DrawingPage(
+                        symbol: symbol,
+                        mode: DrawingMode.verificar,
+                        initialStrokes: state.strokes,
+                      ),
+                    ));
+                  } else {
+                    Navigator.of(context).push(FadeSlideRoute(
+                      page: DrawingPage(symbol: symbol, mode: DrawingMode.paraValer),
+                    ));
+                  }
+                }
+              : null,
+        );
+      },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// Toolbar inferior
+// ─────────────────────────────────────────────────────────
+
 class _DrawingToolbar extends StatelessWidget {
   final List<Color> colors;
   final String? symbolId;
@@ -855,34 +1259,6 @@ class _DrawingToolbar extends StatelessWidget {
                       ),
                     );
                   }),
-                  if (symbolId == 'choku_rei')
-                    GestureDetector(
-                      onTap: () => context
-                          .read<DrawingViewModel>()
-                          .add(const DrawingGuideToggled()),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        width: dotSize,
-                        height: dotSize,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: state.showGuide
-                              ? const Color(0xFF6A0DAD)
-                              : const Color(0xFF2D1B4E),
-                          border: Border.all(
-                            color: const Color(0xFFFFD700),
-                            width: 2,
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.route,
-                          size: dotSize * 0.50,
-                          color: state.showGuide
-                              ? const Color(0xFFFFD700)
-                              : const Color(0xFF6A0DAD),
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ],

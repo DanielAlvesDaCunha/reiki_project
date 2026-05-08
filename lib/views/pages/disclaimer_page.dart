@@ -50,15 +50,30 @@ class _DisclaimerContent extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 680),
           child: Column(
             children: [
-              Icon(Icons.auto_awesome,
-                  size: iconSize, color: const Color(0xFFFFD700)),
+              Image.asset(
+                'assets/images/icon_rounded.png',
+                width: iconSize,
+                height: iconSize,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+              ),
               SizedBox(height: iconSize * 0.25),
               Text(
-                'Conecn\'t Reiki',
+                'Conecn\'t',
                 style: theme.textTheme.headlineLarge?.copyWith(
                   color: const Color(0xFFFFD700),
                   letterSpacing: 2,
-                  fontSize: isTablet ? 36 : null,
+                  fontSize: isTablet ? 56 : 44,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'O Reiki na palma da sua mão',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: Colors.white70,
+                  letterSpacing: 1,
+                  fontSize: isTablet ? 26 : 20,
                 ),
                 textAlign: TextAlign.center,
               ),

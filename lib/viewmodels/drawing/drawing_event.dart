@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 import 'drawing_state.dart';
 
+enum DrawingMode { treino, paraValer, verificar }
+
 abstract class DrawingEvent extends Equatable {
   const DrawingEvent();
 
