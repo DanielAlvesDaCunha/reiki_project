@@ -1,4 +1,4 @@
-package br.com.danielalves.reiki_project
+package br.com.danielalves.reiki
 
 import io.flutter.embedding.android.FlutterActivity
 

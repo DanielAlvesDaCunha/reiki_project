@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../viewmodels/drawing/drawing_event.dart';
 import '../../viewmodels/drawing/drawing_state.dart';
 import '../../viewmodels/drawing/drawing_viewmodel.dart';
+import 'choku_rei_guide_painter.dart';
 
 /// Canvas de desenho com sistema de coordenadas fixo.
 ///
@@ -360,13 +361,14 @@ void _drawStroke(
 /// Retorna o caminho do asset PNG de guia para o símbolo, ou null se não houver.
 String? guideAssetPath(String symbolId) {
   const guides = {
-    'choku_rei':      'assets/guides/choku_rei.png',
-    'seiheki':        'assets/guides/seiheki.png',
-    'honshazeshonen': 'assets/guides/honshazeshonen.png',
-    'daikoomyo_usui': 'assets/guides/daikoomyo_usui.png',
-    'serpente_fogo':  'assets/guides/serpente_fogo.png',
-    'raku':           'assets/guides/raku.png',
-    'la_hanna_nai':   'assets/guides/la_hanna_nai.png',
+    'choku_rei':          'assets/guides/choku_rei.png',
+    'seiheki':            'assets/guides/seiheki.png',
+    'honshazeshonen':     'assets/guides/honshazeshonen.png',
+    'daikoomyo_usui':     'assets/guides/daikoomyo_usui.png',
+    'daikoomyo_tibetano': 'assets/guides/daikoomyo_tibetano.png',
+    'serpente_fogo':      'assets/guides/serpente_fogo.png',
+    'raku':               'assets/guides/raku.png',
+    'la_hanna_nai':       'assets/guides/la_hanna_nai.png',
   };
   return guides[symbolId];
 }
@@ -374,29 +376,31 @@ String? guideAssetPath(String symbolId) {
 /// True se o símbolo tem algum guia disponível (vetorial ou PNG).
 bool symbolHasGuide(String? symbolId) {
   if (symbolId == null) return false;
-  return symbolId == 'choku_rei' || guideAssetPath(symbolId) != null;
+  return symbolId == 'choku_rei' || symbolId == 'seiheki' || guideAssetPath(symbolId) != null;
 }
 
-/// Camada de guia: vetorial para choku_rei, PNG para os demais.
+/// Camada de guia: vetorial para choku_rei, PNG para os demais (incluindo Seiheki).
 class _SymbolGuideLayer extends StatelessWidget {
   final String? symbolId;
   const _SymbolGuideLayer({this.symbolId});
 
   @override
   Widget build(BuildContext context) {
+    if (symbolId == 'choku_rei') {
+      return const ChokuReiGuide();
+    }
+
     final path = symbolId != null ? guideAssetPath(symbolId!) : null;
     if (path == null) return const SizedBox.shrink();
 
     return Opacity(
-      opacity: 0.50,
+      opacity: 0.75,
       child: Transform.scale(
         scale: 1.2,
         child: Image.asset(
           path,
           fit: BoxFit.contain,
           filterQuality: FilterQuality.high,
-          color: Colors.white,
-          colorBlendMode: BlendMode.srcIn,
         ),
       ),
     );
