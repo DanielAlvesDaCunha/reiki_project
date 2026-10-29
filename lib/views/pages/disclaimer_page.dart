@@ -7,7 +7,11 @@ import '../../viewmodels/disclaimer/disclaimer_viewmodel.dart';
 import 'home_page.dart';
 
 class DisclaimerPage extends StatelessWidget {
-  const DisclaimerPage({super.key});
+  /// true quando aberta pela HomePage só para reler o conteúdo
+  /// (mostra seta de voltar e esconde o botão de aceite).
+  final bool isReview;
+
+  const DisclaimerPage({super.key, this.isReview = false});
 
   @override
   Widget build(BuildContext context) {
@@ -20,11 +24,14 @@ class DisclaimerPage extends StatelessWidget {
         }
       },
       child: Scaffold(
+        appBar: isReview
+            ? AppBar(title: const Text('Página Inicial'))
+            : null,
         body: SafeArea(
           child: Column(
             children: [
               Expanded(child: _DisclaimerContent()),
-              _AcceptButton(),
+              if (!isReview) _AcceptButton(),
             ],
           ),
         ),
@@ -78,6 +85,16 @@ class _DisclaimerContent extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
+              _InfoSection(
+                title: 'Objetivo do Aplicativo',
+                content:
+                    'O aplicativo tem como objetivo principal praticar o traçado dos símbolos de forma correta '
+                    'e fornecer informações gerais sobre sua história e aplicação.\n\n'
+                    'Para traçar cada símbolo do Reiki corretamente, siga estes passos simples:\n'
+                    '• Siga a numeração: passe o dedo sobre as linhas na ordem indicada pelos números.\n'
+                    '• Acompanhe as setas: movimente seu dedo na direção exata para onde as setas apontam.',
+              ),
+              const SizedBox(height: 24),
               Container(
                 padding: EdgeInsets.all(isTablet ? 28 : 20),
                 decoration: BoxDecoration(
@@ -103,28 +120,25 @@ class _DisclaimerContent extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Declaro que estou ciente que os símbolos do Reiki são sagrados e compostos pela união de YANTRA e MANTRA. Estes devem ser tratados com respeito e só possuem efetividade quando utilizados por um reikiano que tenha sido devidamente HABILITADO por um Mestre, em seus respectivos níveis.',
+                      'Declaro que estou ciente que os símbolos do Reiki são sagrados e compostos pela união do seu desenho (YANTRA) e da verbalização (MANTRA). Estes devem ser tratados com respeito e só possuem efetividade quando utilizados por um reikiano que tenha sido devidamente HABILITADO por um Mestre, em seus respectivos níveis.',
                       style: theme.textTheme.bodyLarge,
-                      textAlign: TextAlign.justify,
-                    ),
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 16),
-                    Text(
-                      'O objetivo da aplicação de Reiki não é substituir a medicina tradicional, mas complementá-la.',
-                      style: theme.textTheme.bodyMedium,
-                      textAlign: TextAlign.justify,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'As Práticas Integrativas e Complementares em Saúde (PICS) são regulamentadas no SUS por meio da Portaria GM/MS nº 971/2006. O Reiki foi oficialmente incluído no SUS em 2017 pela Portaria GM/MS nº 849/2017.',
-                      style: theme.textTheme.bodyMedium,
                       textAlign: TextAlign.justify,
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
+              _InfoSection(
+                title: 'Objetivo do Reiki',
+                content:
+                    'A aplicação de Reiki não substitui a medicina tradicional, mas a complementa.\n\n'
+                    'As Práticas Integrativas e Complementares em Saúde (PICS) são regulamentadas no Sistema '
+                    'Único de Saúde (SUS) por meio de portarias do Ministério da Saúde (MS) que '
+                    'institucionalizaram a Política Nacional de Práticas Integrativas e Complementares (PNPIC) '
+                    'no ano de 2006, através da Portaria GM/MS nº 971, de 3 de maio de 2006. O Reiki foi '
+                    'oficialmente incluído no SUS em 2017 por meio da Portaria GM/MS nº 849/2017.',
+              ),
+              const SizedBox(height: 16),
               _InfoSection(
                 title: 'Significado',
                 content:
@@ -133,9 +147,15 @@ class _DisclaimerContent extends StatelessWidget {
               const SizedBox(height: 16),
               _InfoSection(
                 title: 'Breve Histórico',
-                content: '• Mestre iniciador: Mikao Usui\n'
-                    '• Introduzido nas Américas por: Mestre Hawayo Takata\n'
-                    '• Chegou ao Brasil em 1983, no Rio de Janeiro, por Egídio Vecchio',
+                content: '• O Reiki teve como Mestre iniciador Mikao Usui, em 1922.\n'
+                    '• Chujiro Hayashi foi um dos principais discípulos de Mikao Usui, responsável por organizar e disseminar o Reiki.\n'
+                    '• Quem trouxe o Reiki para as Américas foi a Mestre Hawayo Takata.\n'
+                    '• O Reiki chegou ao Brasil no ano de 1983, no Rio de Janeiro, por Egídio Vecchio, '
+                    'com o curso ministrado pelo Mestre americano Stephen Cord Saiki.\n\n'
+                    'O Reiki é considerado uma filosofia de vida por grandes Mestres reikianos do mundo, e parte '
+                    'dela é oriunda do Imperador Meiji, que foi um revolucionário no Japão e deixou um legado de '
+                    'milhares de poemas que serviram de inspiração a Mikao Usui. Entre estas inspirações temos '
+                    'os 125 poemas e os cinco princípios do Reiki, considerados como base filosófica.',
               ),
               const SizedBox(height: 16),
               _InfoSection(
@@ -144,6 +164,51 @@ class _DisclaimerContent extends StatelessWidget {
                     '• Nível II — Okuden: A Transformação\n'
                     '• Nível III A — Shinpiden: A Realização\n'
                     '• Nível III B — Gokukaiden: Mestre Professor',
+              ),
+              const SizedBox(height: 16),
+              _InfoSection(
+                title: 'Os Símbolos',
+                content:
+                    'Os símbolos preferencialmente devem ser Yantrados com a mão dominante.\n\n'
+                    '• No Nível I do Reiki o símbolo ancorado é o Sho Ku Rei (opcional: o mestre pode '
+                    'habilitar seu aluno neste símbolo neste nível).\n'
+                    '• No Nível II do Reiki os símbolos ancorados são: Sho Ku Rei, Sei He Ki e Hon Sha Ze Sho Nen.\n'
+                    '• No Nível III A do Reiki o símbolo ancorado é o Dai Koo Myo Usui.\n'
+                    '• No Nível III B do Reiki os símbolos ancorados são: Dai Ko Myo Tibetano, Serpente de Fogo '
+                    'e, opcionalmente por alguns mestres, o La Hanna Nai e o Raku.',
+              ),
+              const SizedBox(height: 16),
+              _InfoSection(
+                title: 'Como utilizar a energia do Reiki durante a aplicação',
+                content:
+                    '• Intenção clara: o reikiano define a intenção de enviar Reiki para o receptor ou '
+                    'situação específica.\n'
+                    '• Ativação do símbolo: cada símbolo tem sua energia ativada quando Yantrado uma vez e '
+                    'Mantrado três vezes. Serve como uma "ponte" energética.\n'
+                    '• Visualização: mentalizar a energia Reiki sobre o receptor ou a situação a ser tratada.\n'
+                    '• Canalização: a energia Reiki é canalizada através do reikiano e enviada para o '
+                    'receptor ou para a situação a ser tratada.\n'
+                    '• Autorização prévia, no caso do envio a distância: o receptor deverá autorizar '
+                    'previamente a aplicação. No caso de o receptor ser ou estar incapaz, a permissão '
+                    'deverá ser dada pelo responsável direto.',
+              ),
+              const SizedBox(height: 16),
+              _InfoSection(
+                title: 'Gokai — Os Cinco Princípios do Reiki',
+                content:
+                    'Para o Mestre Mikao Usui, a cura do corpo começa na alma. Por isso, ele uniu a energia '
+                    'do Reiki à filosofia do Imperador Meiji (1852–1912), uma figura histórica admirada por sua sabedoria.\n\n'
+                    'O imperador escreveu milhares de poemas sagrados (Gyosei) sobre ética e espiritualidade. '
+                    'Inspirado por essa profunda sabedoria, Usui escreve o Gokai — os Cinco Princípios do Reiki:\n\n'
+                    '• Só por hoje, não sinto raiva.\n'
+                    '• Só por hoje, não me preocupo.\n'
+                    '• Só por hoje, sou grato.\n'
+                    '• Só por hoje, trabalho com honestidade.\n'
+                    '• Só por hoje, sou bondoso com todos os seres.\n\n'
+                    'Para que serve e como usar?\n\n'
+                    'Eles servem como uma bússola diária para a paz interior, limpando a mente e elevando sua vibração.\n\n'
+                    'Como usar: recite-os duas vezes ao dia (ao acordar e antes de dormir). Se puder, junte as mãos '
+                    'em prece na altura do coração (posição Gassho), respire fundo e sinta a força do momento presente.',
               ),
               const SizedBox(height: 16),
               const _SealingSection(),
@@ -206,13 +271,17 @@ class _SealingSection extends StatelessWidget {
 
   static const _steps = [
     (
+      icon: Icons.air,
+      text: 'Respirar (Joshin)',
+    ),
+    (
       icon: Icons.self_improvement,
-      text: 'Respirar (Joshin) em posição de Gasho',
+      text: 'Mãos unidas na frente do coração (Gasho)',
     ),
     (
       icon: Icons.connect_without_contact,
       text:
-          'Elevar o pensamento (Reiji Ho) — conexão com as Energias Universais',
+          'Elevar o pensamento e se conectar com as Energias Universais (Reiji)',
     ),
     (
       icon: Icons.arrow_downward,
@@ -227,17 +296,17 @@ class _SealingSection extends StatelessWidget {
     (
       icon: Icons.back_hand,
       text:
-          'Mantrar e Yantrar o Choku Rei em cada palma das mãos para sensibilizá-las',
+          'Mantrar e Yantrar o Sho Ku Rei em cada palma das mãos para sensibilizá-las',
     ),
     (
       icon: Icons.shield_outlined,
       text:
-          'Fazer um grande Choku Rei à frente, mentalizando cobrindo todo o seu ser',
+          'Fazer um grande Sho Ku Rei à frente, mentalizando cobrindo todo o seu ser',
     ),
     (
       icon: Icons.grain,
       text:
-          'Fazer um Choku Rei em cada chacra (do básico ao coronário), yantrando e mantrando, '
+          'Fazer um Sho Ku Rei em cada chacra (do básico ao coronário), yantrando e mantrando, '
               'um de cada vez, mentalizando o símbolo adentrando no local',
     ),
   ];
@@ -268,7 +337,7 @@ class _SealingSection extends StatelessWidget {
                   color: const Color(0xFFFFD700), size: isTablet ? 22 : 18),
               const SizedBox(width: 8),
               Text(
-                'Selamento do Reiki',
+                'Selamento (Proteção) do Reiki',
                 style: (isTablet
                         ? theme.textTheme.titleLarge
                         : theme.textTheme.titleMedium)

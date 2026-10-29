@@ -35,17 +35,30 @@ class SymbolDetailPage extends StatelessWidget {
                 const SizedBox(height: 24),
                 _Section(
                   icon: Icons.description_outlined,
-                  title: 'Descrição',
+                  title: 'Sobre ${_artigo(symbol)} ${symbol.name}',
                   content: symbol.description,
                 ),
                 const SizedBox(height: 16),
                 _Section(
                   icon: Icons.history_edu,
-                  title: 'Origem',
+                  title: 'Raiz ${_contracao(symbol)} ${symbol.name}',
                   content: symbol.origin,
                 ),
                 const SizedBox(height: 16),
-                _ActionsList(actions: symbol.actions),
+                _ActionsList(
+                  title: symbol.actionsTitle ??
+                      'Atuação e funções ${_contracao(symbol)} ${symbol.name}',
+                  intro: symbol.actionsIntro,
+                  actions: symbol.actions,
+                ),
+                for (final extra in symbol.extraSections) ...[
+                  const SizedBox(height: 16),
+                  _Section(
+                    icon: Icons.lightbulb_outline,
+                    title: extra.title,
+                    content: extra.content,
+                  ),
+                ],
                 const SizedBox(height: 32),
                 _YantraButtons(symbol: symbol, width: w),
                 const SizedBox(height: 4),
@@ -172,9 +185,11 @@ class _Section extends StatelessWidget {
             children: [
               Icon(icon, size: 18, color: const Color(0xFFB388FF)),
               const SizedBox(width: 8),
-              Text(title,
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold)),
+              Expanded(
+                child: Text(title,
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold)),
+              ),
             ],
           ),
           const SizedBox(height: 10),
@@ -187,9 +202,15 @@ class _Section extends StatelessWidget {
   }
 }
 
+// Serpente de Fogo é o único nome feminino entre os símbolos.
+String _artigo(ReikiSymbol s) => s.id == 'serpente_fogo' ? 'a' : 'o';
+String _contracao(ReikiSymbol s) => s.id == 'serpente_fogo' ? 'da' : 'do';
+
 class _ActionsList extends StatelessWidget {
+  final String title;
+  final String? intro;
   final List<String> actions;
-  const _ActionsList({required this.actions});
+  const _ActionsList({required this.title, this.intro, required this.actions});
 
   @override
   Widget build(BuildContext context) {
@@ -211,12 +232,18 @@ class _ActionsList extends StatelessWidget {
             children: [
               const Icon(Icons.bolt, size: 18, color: Color(0xFFFFD700)),
               const SizedBox(width: 8),
-              Text('Atuações e Ações',
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold)),
+              Expanded(
+                child: Text(title,
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold)),
+              ),
             ],
           ),
           const SizedBox(height: 10),
+          if (intro != null) ...[
+            Text(intro!, style: theme.textTheme.bodyMedium),
+            const SizedBox(height: 10),
+          ],
           ...actions.map(
             (a) => Padding(
               padding: const EdgeInsets.only(bottom: 6),

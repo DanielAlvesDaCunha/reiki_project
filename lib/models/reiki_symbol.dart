@@ -25,6 +25,12 @@ class ReikiSymbol extends Equatable {
   final String description;
   final String origin;
   final List<String> actions;
+  /// Frase opcional exibida antes da lista de atuações.
+  final String? actionsIntro;
+  /// Título da lista de atuações; null usa "Atuação e funções do [name]".
+  final String? actionsTitle;
+  /// Seções extras exibidas depois das atuações (ex.: benefícios, como fazer).
+  final List<({String title, String content})> extraSections;
   final ReikiLevel minLevel;
   final String? imagePath;
 
@@ -36,11 +42,14 @@ class ReikiSymbol extends Equatable {
     required this.description,
     required this.origin,
     required this.actions,
+    this.actionsIntro,
+    this.actionsTitle,
+    this.extraSections = const [],
     required this.minLevel,
     this.imagePath,
   });
 
   @override
   List<Object?> get props =>
-      [id, name, subtitle, element, description, origin, actions, minLevel, imagePath];
+      [id, name, subtitle, element, description, origin, actions, actionsIntro, actionsTitle, extraSections, minLevel, imagePath];
 }

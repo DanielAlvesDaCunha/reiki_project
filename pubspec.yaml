@@ -2,7 +2,7 @@ name: reiki_project
 description: "Aplicativo de desenho dos símbolos de Reiki - Conecn't Reiki"
 publish_to: 'none'
 
-version: 1.0.0+2
+version: 1.0.0+3
 
 environment:
   sdk: ^3.7.0

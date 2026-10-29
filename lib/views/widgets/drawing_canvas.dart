@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../viewmodels/drawing/drawing_event.dart';
 import '../../viewmodels/drawing/drawing_state.dart';
 import '../../viewmodels/drawing/drawing_viewmodel.dart';
-import 'choku_rei_guide_painter.dart';
 
 /// Canvas de desenho com sistema de coordenadas fixo.
 ///
@@ -132,6 +131,34 @@ class _DrawingCanvasState extends State<DrawingCanvas> {
                     ),
                   ),
                 ),
+
+                // ── Legenda do guia ──
+                if (state.showGuide)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    right: 8,
+                    child: IgnorePointer(
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xCC1A0A2E),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            'Linha branca: símbolo  •  Setas cinza: apenas a ordem e o sentido dos traços',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Color(0xFFE0E0E0),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             );
           },
@@ -379,17 +406,13 @@ bool symbolHasGuide(String? symbolId) {
   return symbolId == 'choku_rei' || symbolId == 'seiheki' || guideAssetPath(symbolId) != null;
 }
 
-/// Camada de guia: vetorial para choku_rei, PNG para os demais (incluindo Seiheki).
+/// Camada de guia: PNG para todos os símbolos.
 class _SymbolGuideLayer extends StatelessWidget {
   final String? symbolId;
   const _SymbolGuideLayer({this.symbolId});
 
   @override
   Widget build(BuildContext context) {
-    if (symbolId == 'choku_rei') {
-      return const ChokuReiGuide();
-    }
-
     final path = symbolId != null ? guideAssetPath(symbolId!) : null;
     if (path == null) return const SizedBox.shrink();
 

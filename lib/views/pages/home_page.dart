@@ -6,7 +6,9 @@ import '../../models/reiki_symbol.dart';
 import '../../viewmodels/symbol/symbol_event.dart';
 import '../../viewmodels/symbol/symbol_state.dart';
 import '../../viewmodels/symbol/symbol_viewmodel.dart';
+import '../widgets/level_application_sheet.dart';
 import '../widgets/symbol_card.dart';
+import 'disclaimer_page.dart';
 import 'symbol_detail_page.dart';
 
 class HomePage extends StatelessWidget {
@@ -16,6 +18,13 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Voltar à página inicial',
+          onPressed: () => Navigator.of(context).push(
+            FadeSlideRoute(page: const DisclaimerPage(isReview: true)),
+          ),
+        ),
         title: const Text('Símbolos de Reiki'),
         actions: [
           IconButton(
@@ -34,6 +43,8 @@ class HomePage extends StatelessWidget {
             return Column(
               children: [
                 _LevelFilter(activeFilter: state.activeFilter),
+                if (state.activeFilter != null)
+                  LevelApplicationButton(level: state.activeFilter!),
                 Expanded(child: _SymbolList(state: state)),
               ],
             );

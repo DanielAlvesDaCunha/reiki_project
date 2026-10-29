@@ -13,7 +13,7 @@ class ChokuReiGuide extends StatelessWidget {
   const ChokuReiGuide({
     super.key,
     this.strokeColor = const Color(0xFFB0BEC5), // Setas e números em Cinza
-    this.guideLineColor = const Color(0x998A2BE2), // Traço do símbolo em Púrpura Escuro
+    this.guideLineColor = const Color(0xFFFFFFFF), // Traço do símbolo em Branco
   });
 
   @override
