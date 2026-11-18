@@ -6,6 +6,7 @@ import '../../models/reiki_symbol.dart';
 import '../../repositories/drawing_save_repository.dart';
 import '../../viewmodels/drawing/drawing_event.dart';
 import '../widgets/drawing_canvas.dart' show symbolHasGuide;
+import '../widgets/level_application_sheet.dart';
 import 'drawing_page.dart';
 import 'saved_drawings_page.dart';
 
@@ -32,7 +33,9 @@ class SymbolDetailPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _SymbolHeader(symbol: symbol),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+                LevelTechniquesCard(level: symbol.minLevel),
+                const SizedBox(height: 16),
                 _Section(
                   icon: Icons.description_outlined,
                   title: 'Sobre ${_artigo(symbol)} ${symbol.name}',

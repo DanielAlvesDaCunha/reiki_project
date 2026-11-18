@@ -5,7 +5,7 @@ class SymbolRepositoryImpl implements SymbolRepository {
   static const _symbols = <ReikiSymbol>[
     ReikiSymbol(
       id: 'choku_rei',
-      name: 'Sho Ku Rei',
+      name: 'Choku Rei',
       subtitle: 'Símbolo do Poder',
       element: 'Terra',
       description:
@@ -50,7 +50,7 @@ class SymbolRepositoryImpl implements SymbolRepository {
           'De origem budista com modificações sofridas através do tempo.\n\n'
           'Promove o equilíbrio emocional, harmonia e purificação, alinhando-se com o princípio '
           'da compaixão.\n\n'
-          'Energeticamente dependente do Sho Ku Rei para sua ativação. É um lembrete de que a '
+          'Energeticamente dependente do Choku Rei para sua ativação. É um lembrete de que a '
           'saúde não é apenas uma questão física, mas também um estado de equilíbrio emocional e '
           'mental. Usá-lo na prática do Reiki pode trazer bem-estar.\n\n'
           'Pode ter significados como: "a paz está aqui", "o homem e Deus se tornam um". Estes '
@@ -108,7 +108,7 @@ class SymbolRepositoryImpl implements SymbolRepository {
           content:
               'Para aplicar o símbolo Hon Sha Ze Sho Nen em um tratamento de reprogramação, ou envio '
               'a distância de Reiki, siga os passos semelhantes ao descrito pelo Sei He Ki, contudo '
-              'deve-se usar em ordem decrescente: Hon Sha Ze Sho Nen, Sei He Ki e o Sho Ku Rei.',
+              'deve-se usar em ordem decrescente: Hon Sha Ze Sho Nen, Sei He Ki e o Choku Rei.',
         ),
       ],
       minLevel: ReikiLevel.levelII,
@@ -205,7 +205,7 @@ class SymbolRepositoryImpl implements SymbolRepository {
       actionsTitle: 'Atuações e ações do Raku',
       actions: [
         'Aterramento',
-        'Separação energética',
+        'O raio que dissemina a luz ou que clareia',
         'Liberação de energias negativas ancestrais',
       ],
       minLevel: ReikiLevel.levelIIIB,

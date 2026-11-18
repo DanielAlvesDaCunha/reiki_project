@@ -66,11 +66,11 @@ class _DisclaimerContent extends StatelessWidget {
               ),
               SizedBox(height: iconSize * 0.25),
               Text(
-                'Conecn\'t',
+                'Connecting Reiki',
                 style: theme.textTheme.headlineLarge?.copyWith(
                   color: const Color(0xFFFFD700),
                   letterSpacing: 2,
-                  fontSize: isTablet ? 56 : 44,
+                  fontSize: isTablet ? 48 : 34,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -151,11 +151,7 @@ class _DisclaimerContent extends StatelessWidget {
                     '• Chujiro Hayashi foi um dos principais discípulos de Mikao Usui, responsável por organizar e disseminar o Reiki.\n'
                     '• Quem trouxe o Reiki para as Américas foi a Mestre Hawayo Takata.\n'
                     '• O Reiki chegou ao Brasil no ano de 1983, no Rio de Janeiro, por Egídio Vecchio, '
-                    'com o curso ministrado pelo Mestre americano Stephen Cord Saiki.\n\n'
-                    'O Reiki é considerado uma filosofia de vida por grandes Mestres reikianos do mundo, e parte '
-                    'dela é oriunda do Imperador Meiji, que foi um revolucionário no Japão e deixou um legado de '
-                    'milhares de poemas que serviram de inspiração a Mikao Usui. Entre estas inspirações temos '
-                    'os 125 poemas e os cinco princípios do Reiki, considerados como base filosófica.',
+                    'com o curso ministrado pelo Mestre americano Stephen Cord Saiki.',
               ),
               const SizedBox(height: 16),
               _InfoSection(
@@ -170,9 +166,9 @@ class _DisclaimerContent extends StatelessWidget {
                 title: 'Os Símbolos',
                 content:
                     'Os símbolos preferencialmente devem ser Yantrados com a mão dominante.\n\n'
-                    '• No Nível I do Reiki o símbolo ancorado é o Sho Ku Rei (opcional: o mestre pode '
+                    '• No Nível I do Reiki o símbolo ancorado é o Choku Rei (opcional: o mestre pode '
                     'habilitar seu aluno neste símbolo neste nível).\n'
-                    '• No Nível II do Reiki os símbolos ancorados são: Sho Ku Rei, Sei He Ki e Hon Sha Ze Sho Nen.\n'
+                    '• No Nível II do Reiki os símbolos ancorados são: Choku Rei, Sei He Ki e Hon Sha Ze Sho Nen.\n'
                     '• No Nível III A do Reiki o símbolo ancorado é o Dai Koo Myo Usui.\n'
                     '• No Nível III B do Reiki os símbolos ancorados são: Dai Ko Myo Tibetano, Serpente de Fogo '
                     'e, opcionalmente por alguns mestres, o La Hanna Nai e o Raku.',
@@ -184,7 +180,7 @@ class _DisclaimerContent extends StatelessWidget {
                     '• Intenção clara: o reikiano define a intenção de enviar Reiki para o receptor ou '
                     'situação específica.\n'
                     '• Ativação do símbolo: cada símbolo tem sua energia ativada quando Yantrado uma vez e '
-                    'Mantrado três vezes. Serve como uma "ponte" energética.\n'
+                    'Mantrado três vezes.\n'
                     '• Visualização: mentalizar a energia Reiki sobre o receptor ou a situação a ser tratada.\n'
                     '• Canalização: a energia Reiki é canalizada através do reikiano e enviada para o '
                     'receptor ou para a situação a ser tratada.\n'
@@ -296,17 +292,17 @@ class _SealingSection extends StatelessWidget {
     (
       icon: Icons.back_hand,
       text:
-          'Mantrar e Yantrar o Sho Ku Rei em cada palma das mãos para sensibilizá-las',
+          'Mantrar e Yantrar o Choku Rei em cada palma das mãos para sensibilizá-las',
     ),
     (
       icon: Icons.shield_outlined,
       text:
-          'Fazer um grande Sho Ku Rei à frente, mentalizando cobrindo todo o seu ser',
+          'Fazer um grande Choku Rei à frente, mentalizando-o de modo a cobrir todo o seu corpo (ou todo o seu ser)',
     ),
     (
       icon: Icons.grain,
       text:
-          'Fazer um Sho Ku Rei em cada chacra (do básico ao coronário), yantrando e mantrando, '
+          'Fazer um Choku Rei em cada chacra (do básico ao coronário), yantrando e mantrando, '
               'um de cada vez, mentalizando o símbolo adentrando no local',
     ),
   ];

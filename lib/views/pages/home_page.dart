@@ -61,7 +61,7 @@ class HomePage extends StatelessWidget {
       builder: (_) => AlertDialog(
         title: const Text('Sobre o App'),
         content: const Text(
-          'Conecn\'t Reiki\n\n'
+          'Connecting Reiki\n\n'
           'Aplicativo para prática do Yantra — o desenho dos símbolos sagrados do Reiki.\n\n'
           'Desenvolvido como ferramenta complementar para reikianos devidamente habilitados.',
         ),

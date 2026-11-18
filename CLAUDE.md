@@ -1,4 +1,4 @@
-# Conecn't Reiki — CLAUDE.md
+# Connecting Reiki — CLAUDE.md
 
 Aplicativo Flutter desenvolvido na **Fiocruz** para prática do Yantra (desenho dos símbolos sagrados do Reiki). Ferramenta de apoio às Práticas Integrativas e Complementares em Saúde (PICS) — regulamentadas no SUS pela Portaria GM/MS nº 849/2017.
 

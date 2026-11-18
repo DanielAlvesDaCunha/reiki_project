@@ -30,7 +30,7 @@ class ReikiApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Conecn\'t Reiki',
+        title: 'Connecting Reiki',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.dark,
         home: const DisclaimerPage(),
