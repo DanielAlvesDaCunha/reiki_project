@@ -1,0 +1,15 @@
+Software: Conecn't Reiki
+Arquivo: Conectn_Reiki_codigo_fonte.zip
+Tamanho: 1758836 bytes
+Data UTC: 2026-09-16T18:53:08Z
+Commit Git: 1aceabce3db422c8cdf34abd22bda582a12d5c3e
+Linguagem: Dart
+Framework: Flutter 3.41.1 / Dart 3.7
+
+Algoritmo: SHA-512
+Hash: 8750f79eac26af33d9d82c8f47d97e4c10b360d4139d686878ce1b444ff78a9adc65b3bcf4cf12b28448dd2dba1e03a44b1cc42167b580de2a3049061b300a54
+
+Algoritmo: SHA-256
+Hash: e3883ed4079deee613f4ce06965f8d99d64ff5233f1638da9af98249145eadb7
+
+IMPORTANTE: Guarde este .zip em sigilo. O hash só é válido para ESTE arquivo exato.
